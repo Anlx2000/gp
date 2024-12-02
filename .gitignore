@@ -1,0 +1,5 @@
+/datasets/flowers102/images/*
+/CLS/logs
+*.DS_Store
+**/__pycache__/
+/CLS/checkpoints/*
