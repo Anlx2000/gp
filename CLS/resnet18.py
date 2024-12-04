@@ -39,7 +39,7 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.inplanes = 64
         self.dilation = 1
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=15, stride=2, padding=7,bias=False)
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=31, stride=2, padding=15,bias=False)
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
