@@ -15,11 +15,8 @@ class ResNet(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.scconv1 = ScConv(64)   
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
-        self.scconv2 = ScConv(128)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
-        self.scconv3 = ScConv(256)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
@@ -36,10 +33,6 @@ class ResNet(nn.Module):
         if pretrained:
             # 加载预训练权重
             state_dict = torch.load('path/to/pretrained/resnet18.pth')
-            # 修改第一层卷积的权重以适应6通道输入
-            # 复制原始权重并在通道维度上重复
-            conv1_weight = state_dict['conv1.weight']
-            state_dict['conv1.weight'] = torch.cat([conv1_weight, conv1_weight], dim=1)
             self.load_state_dict(state_dict)
     
     def _make_layer(self, block, planes, blocks, stride=1):
@@ -70,7 +63,6 @@ class ResNet(nn.Module):
         x = self.layer2(x)
         x = self.scconv2(x)
         x = self.layer3(x)
-        x = self.scconv3(x)
         x = self.layer4(x)
         
         x = self.avgpool(x)

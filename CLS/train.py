@@ -6,6 +6,7 @@ from tqdm import tqdm
 import os
 from model import get_model
 from dataloader import get_flowers102_dataloader
+import argparse  # 导入argparse
 
 def train(config):
     # 设置设备
@@ -13,6 +14,15 @@ def train(config):
     
     # 创建模型
     model = get_model(config)
+    
+    # 加载训练过的模型
+    if config['resume']:
+        model_path = os.path.join(config['checkpoint_dir'], 'best_model.pth')
+        if os.path.exists(model_path):
+            model.load_state_dict(torch.load(model_path))
+            print(f"成功加载模型: {model_path}")
+        else:
+            print(f"未找到模型文件: {model_path}")
     model = model.to(device)
     
     # 定义损失函数和优化器
@@ -122,19 +132,22 @@ def train(config):
     writer.close()
 
 if __name__ == '__main__':
-    # 训练配置
-    config = {
-        'data_dir': '../datasets/flowers102',  # 数据集路径
-        'log_dir': './logs',                   # 日志路径
-        'checkpoint_dir': './checkpoints',      # 模型保存路径
-        'batch_size': 32,
-        'num_workers': 4,
-        'learning_rate': 1e-4,
-        'epochs': 50,
-        'model_name': 'resnet18',              # 使用的模型
-        'num_classes': 102,
-        'pretrained': False
-    }
+    # 创建参数解析器
+    parser = argparse.ArgumentParser(description='训练配置')
+    parser.add_argument('--data_dir', type=str, default='../datasets/flowers102', help='数据集路径')
+    parser.add_argument('--log_dir', type=str, default='./logs', help='日志路径')
+    parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints', help='模型保存路径')
+    parser.add_argument('--batch_size', type=int, default=32, help='批处理大小')
+    parser.add_argument('--num_workers', type=int, default=4, help='工作线程数')
+    parser.add_argument('--learning_rate', type=float, default=1e-4, help='学习率')
+    parser.add_argument('--epochs', type=int, default=50, help='训练轮数')
+    parser.add_argument('--model_name', type=str, default='resnet18', help='使用的模型')
+    parser.add_argument('--num_classes', type=int, default=102, help='类别数')
+    parser.add_argument('--pretrained', type=bool, default=False, help='是否使用预训练模型')
+    parser.add_argument('--resume', type=bool, default=False, help='是否从上次训练中恢复')
+
+    # 解析参数
+    config = vars(parser.parse_args())
     
     # 创建必要的目录
     os.makedirs(config['log_dir'], exist_ok=True)
