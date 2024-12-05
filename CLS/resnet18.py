@@ -21,7 +21,6 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.scconv3 = ScConv(256)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
-        self.scconv4 = ScConv(512)
         
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
@@ -73,7 +72,6 @@ class ResNet(nn.Module):
         x = self.layer3(x)
         x = self.scconv3(x)
         x = self.layer4(x)
-        x = self.scconv4(x)
         
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
