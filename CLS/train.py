@@ -139,7 +139,7 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints', help='模型保存路径')
     parser.add_argument('--batch_size', type=int, default=32, help='批处理大小')
     parser.add_argument('--num_workers', type=int, default=4, help='工作线程数')
-    parser.add_argument('--learning_rate', type=float, default=1e-4, help='学习率')
+    parser.add_argument('--lr', type=float, default=1e-3, help='学习率')
     parser.add_argument('--epochs', type=int, default=50, help='训练轮数')
     parser.add_argument('--model_name', type=str, default='resnet18', help='使用的模型')
     parser.add_argument('--num_classes', type=int, default=102, help='类别数')
