@@ -1,0 +1,38 @@
+# 图像基本参数
+img_size: 224
+channels: 3
+
+# 数据增强参数
+flip_lr: 0.5      # 水平翻转概率
+flip_ud: 0.0      # 垂直翻转概率
+degrees: 10.0     # 旋转角度范围
+
+# RandomResizedCrop参数
+scale_min: 0.6   # 最小缩放比例
+scale_max: 1.0    # 最大缩放比例
+ratio_min: 0.75   # 最小宽高比
+ratio_max: 1.33   # 最大宽高比
+
+# 颜色增强参数
+brightness: 0.1   # 亮度变化范围
+contrast: 0.1     # 对比度变化范围
+saturation: 0.1   # 饱和度变化范围
+hue: 0.1         # 色调变化范围
+
+# RandomErasing参数
+erasing_p: 0.5          # 随机擦除概率
+erasing_scale: [0.02, 0.33]  # 擦除区域大小范围
+erasing_ratio: [0.3, 3.3]    # 擦除区域宽高比范围
+
+# 标准化参数
+normalize_mean: [0.485, 0.456, 0.406]  # ImageNet均值
+normalize_std: [0.229, 0.224, 0.225]   # ImageNet标准差
+
+# 训练参数
+epochs: 100
+batch_size: 32
+workers: 4
+optimizer: 'Adam'    # 'SGD', 'Adam', 'AdamW'
+learning_rate: 0.001
+weight_decay: 0.0005
+momentum: 0.9        # SGD动量

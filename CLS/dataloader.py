@@ -7,33 +7,35 @@ import json
 from scipy.io import loadmat
 import numpy as np
 from imagecorruptions import corrupt
+import yaml
+from utils.augmentation import create_train_transforms, create_val_transforms
 
 class Flowers102Dataset(Dataset):
-    def __init__(self, root_dir, split='train', transform=None, corruption_type=None, severity=1):
+    def __init__(self, root_dir, split='train', hyp=None, corruption_type=None, severity=1):
         """
         参数:
             root_dir (str): 数据集根目录
             split (str): 'train' 或 'test'
-            transform: 图像预处理转换
-            corruption_type (str): 噪声类型，可选 ['snow', 'fog', 'brightness', 'contrast', 'elastic', 'pixelate', 'jpeg']
-            severity (int): 噪声程度 (1-5)
+            hyp (dict): 超参数配置
+            corruption_type (str): 噪声类型
+            severity (int): 噪声程度
         """
         self.root_dir = root_dir
         self.split = split
         self.corruption_type = corruption_type
         self.severity = severity
         
-        # 默认的图像转换
-        if transform is None:
-            self.transform = transforms.Compose([
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5, 0.5, 0.5],
-                                  std=[0.5, 0.5, 0.5])
-            ])
+        # 加载超参数
+        if hyp is None:
+            with open('utils/hyp.yaml', 'r') as f:
+                hyp = yaml.safe_load(f)
+        
+        # 根据split选择不同的数据增强
+        if split == 'train':
+            self.transform = create_train_transforms(hyp)
         else:
-            self.transform = transform  
-
+            self.transform = create_val_transforms(hyp)
+        
         splits = {'train':[], 'test':[]}
         data_split_by_class = {i:[] for i in range(1, 103)}
         data = loadmat(os.path.join(root_dir,'labels/imagelabels.mat'))
