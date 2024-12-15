@@ -27,7 +27,7 @@ def train(config):
     
     # 定义损失函数和优化器
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=config['learning_rate'])
+    optimizer = optim.Adam(model.parameters(), lr=config['lr'])
     
     # 学习率调度器 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(

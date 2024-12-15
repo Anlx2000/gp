@@ -17,7 +17,7 @@ class FlowerClassifier(nn.Module):
         
         # 选择backbone
         if model_name == 'resnet18':
-            self.backbone = resnet18(num_classes, pretrained=pretrained)
+            self.backbone = models.resnet18(num_classes, pretrained=pretrained)
         elif model_name == 'resnet34':
             self.backbone = models.resnet34(pretrained=pretrained)
         elif model_name == 'resnet50':
@@ -34,7 +34,7 @@ class FlowerClassifier(nn.Module):
         self.backbone.fc = nn.Sequential(
             nn.Linear(in_features, 512),
             nn.ReLU(),
-            nn.Dropout(0.5),
+            nn.Dropout(0.2),
             nn.Linear(512, num_classes)
         )
         print(self.backbone)
