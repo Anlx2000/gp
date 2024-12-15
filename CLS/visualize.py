@@ -4,21 +4,28 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import seaborn as sns
+from imagecorruptions import corrupt
 from tqdm import tqdm
+from PIL import Image
+from utils import augmentation
+import torchvision.transforms as transforms
+
 
 class FeatureVisualizer:
-    def __init__(self, model, dataloader, device, layer_name='layer4'):
+    def __init__(self, model, corruptions, img_path, device, layer_name='layer4'):
         """
         特征可视化器
         
         参数:
             model: 模型
-            dataloader: 数据加载器
+            corruptions: 噪声类型
+            img_path: 图像路径
             device: 设备 (cuda/cpu)
             layer_name: 要提取特征的层名称
         """
         self.model = model
-        self.dataloader = dataloader
+        self.corruptions = corruptions
+        self.img_path = img_path
         self.device = device
         self.layer_name = layer_name
         self.features = []
@@ -43,28 +50,50 @@ class FeatureVisualizer:
     def extract_features(self):
         """提取特征"""
         self.model.eval()
+        corrucls_num = len(self.corruptions)
+        imgs = {corruption: Image.open(self.img_path).convert('RGB') for corruption in self.corruptions}
+        imgs['clean'] = Image.open(self.img_path).convert('RGB')
+        for corruption in self.corruptions:
+            imgs[corruption] = corrupt(np.array(imgs[corruption]), corruption_name=corruption, severity=3)
+            imgs[corruption] = Image.fromarray(imgs[corruption])
+            Image.fromarray(np.array(imgs[corruption])).save(f'./corruption_imgs/{corruption}.png')
+
+        hyp = yaml.safe_load(open('./utils/hyp.yaml', 'r'))
+        img_transforms = augmentation.Compose([
+            transforms.Resize(int(hyp['img_size'] * 1.143)),
+            transforms.CenterCrop(hyp['img_size']),
+            transforms.ToTensor(),
+            augmentation.Normalize(
+                mean=hyp['normalize_mean'],
+                std=hyp['normalize_std']
+            )
+        ])
         with torch.no_grad():
-            for images, labels in tqdm(self.dataloader, desc="提取特征"):
-                images = images.to(self.device)
+            label_num = 0
+            for corruption, img in imgs.items():
+                image = img_transforms(img).unsqueeze(0)
+                image = image.to(self.device)
                 # 前向传播
-                self.model(images)
+                self.model(image)
                 # 获取特征
                 features = self.activation[self.layer_name]
                 # 将特征展平
-                features = torch.mean(features, dim=[2, 3])  # 全局平均池化
-                
-                self.features.append(features.cpu().numpy())
-                self.labels.append(labels.numpy())
-        
+                features = features.view(features.size(0), features.size(1), -1)  # 展平特征图
+                features = features.permute(0, 2, 1)  # 调整维度以适应降维
+                features = features.cpu().numpy()  # 转换为numpy数组
+                features = features.reshape(-1, features.shape[1])
+                self.features.append(features)
+                self.labels.append([label_num] * features.shape[0])
+                label_num += 1
         self.features = np.concatenate(self.features)
         self.labels = np.concatenate(self.labels)
-    
+        
     def visualize_tsne(self, n_components=2, perplexity=30):
         """使用t-SNE可视化特征"""
         print("正在进行t-SNE降维...")
         tsne = TSNE(n_components=n_components, perplexity=perplexity)
         features_embedded = tsne.fit_transform(self.features)
-        
+        print("t-SNE降维完成")
         plt.figure(figsize=(10, 10))
         scatter = plt.scatter(features_embedded[:, 0], features_embedded[:, 1], 
                             c=self.labels, cmap='tab20')
@@ -73,11 +102,8 @@ class FeatureVisualizer:
         plt.xlabel('t-SNE dimension 1')
         plt.ylabel('t-SNE dimension 2')
         
-        plt.savefig('./t-SNE_visualization.png', dpi=300, bbox_inches='tight')
-        plt.close()
-        print("t-SNE结果已保存")
 
-
+        
     
     def visualize_pca(self, n_components=2):
         """使用PCA可视化特征"""
@@ -87,7 +113,7 @@ class FeatureVisualizer:
         
         plt.figure(figsize=(10, 10))
         scatter = plt.scatter(features_embedded[:, 0], features_embedded[:, 1], 
-                            c=self.labels, cmap='tab20')
+                            c=[i for i in range(len(self.labels))], cmap='tab20')
         plt.colorbar(scatter)
         plt.title(f'PCA visualization of features\nExplained variance ratio: {pca.explained_variance_ratio_}')
         plt.xlabel('First Principal Component')
@@ -118,21 +144,20 @@ class FeatureVisualizer:
         plt.title('Label Distribution')
         
         plt.tight_layout()
-        plt.savefig('./feature_distribution.png', dpi=300, bbox_inches='tight')
-        plt.close()
-        print("特征分布已保存")
+        plt.show()
 
-def visualize_model_features(model, dataloader, device,layer_name='backbone.layer4', save_dir=None):
+def visualize_model_features(model, corruptions, img_path, device,layer_name='backbone.layer4', save_dir=None):
     """
     可视化模型特征
-    
+
     参数:
         model: 模型
-        dataloader: 数据加载器
+        corruptions: 噪声类型
+        img_path: 图像路径
         device: 设备
         save_dir: 保存目录
     """
-    visualizer = FeatureVisualizer(model, dataloader, device,layer_name=layer_name)
+    visualizer = FeatureVisualizer(model, corruptions, img_path, device,layer_name=layer_name)
     
     # 提取特征
     visualizer.extract_features()
@@ -148,8 +173,7 @@ def visualize_model_features(model, dataloader, device,layer_name='backbone.laye
 
 if __name__ == '__main__':
     # 测试代码
-    from model import get_model
-    from dataloader import get_flowers102_dataloader
+    from model import get_model 
     import yaml
     
     # 加载配置
@@ -164,11 +188,7 @@ if __name__ == '__main__':
     model.load_state_dict(torch.load('./checkpoints/best_model.pth')['model_state_dict'])
     model = model.to(device)
     
-    # 获取数据加载器
-    _, test_loader = get_flowers102_dataloader(
-        root_dir='../datasets/flowers102',
-        batch_size=32
-    )
-    
+    img_path = '../datasets/flowers102/images/image_00001.jpg'
+    corruptions = ['snow', 'fog', 'brightness', 'contrast', 'pixelate']
     # 可视化特征
-    visualize_model_features(model, test_loader, device,layer_name='backbone.layer4') 
+    visualize_model_features(model, corruptions, img_path, device,layer_name='backbone.layer4') 
