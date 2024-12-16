@@ -34,7 +34,7 @@ class FlowerClassifier(nn.Module):
         self.backbone.fc = nn.Sequential(
             nn.Linear(in_features, 512),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.5),
             nn.Linear(512, num_classes)
         )
         print(self.backbone)
