@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from resnet18 import resnet18
+from sku import SKNet
 import torchvision.models as models
 
 class FlowerClassifier(nn.Module):
@@ -33,13 +34,24 @@ class FlowerClassifier(nn.Module):
         # 替换最后的全连接层
         self.backbone.fc = nn.Sequential(
             nn.Linear(in_features, 512),
-            nn.ReLU(),
+            nn.ReLU()
+        )
+        self.cls_classifier = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(512, num_classes)
         )
-        print(self.backbone)
+        self.corruption_classifier = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(512, 4)
+        )
+        self.sku = SKNet(num_classes)
     def forward(self, x):
-        return self.backbone(x)
+        # x = self.backbone(x)
+        # cls_output = self.cls_classifier(x)
+        # corruption_output = self.corruption_classifier(x)
+        # return cls_output, corruption_output
+        x = self.sku(x)
+        return x
 
 def get_model(config):
     """
