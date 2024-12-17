@@ -14,7 +14,7 @@ def train(config):
     
     # 创建模型
     model = get_model(config)
-    
+    print(model)
     # 加载训练过的模型
     if config['resume']:
         model_path = os.path.join(config['checkpoint_dir'], 'best_model.pth')

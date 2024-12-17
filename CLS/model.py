@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from resnet18 import resnet18
 from sku import SKNet
+from utils.filter_atten import FilterAtten
 import torchvision.models as models
 
 class FlowerClassifier(nn.Module):
@@ -31,26 +32,25 @@ class FlowerClassifier(nn.Module):
         # 获取特征维度
         in_features = self.backbone.fc.in_features
         
+        self.backbone.avgpool = nn.Sequential(
+            FilterAtten(HW=7, inplane=512),
+            nn.AdaptiveAvgPool2d((1, 1))
+        )
+
         # 替换最后的全连接层
         self.backbone.fc = nn.Sequential(
             nn.Linear(in_features, 512),
-            nn.ReLU()
-        )
-        self.cls_classifier = nn.Sequential(
+            nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(512, num_classes)
         )
-        self.corruption_classifier = nn.Sequential(
-            nn.Dropout(0.5),
-            nn.Linear(512, 4)
-        )
-        self.sku = SKNet(num_classes)
+
     def forward(self, x):
-        # x = self.backbone(x)
+        x = self.backbone(x)
         # cls_output = self.cls_classifier(x)
         # corruption_output = self.corruption_classifier(x)
         # return cls_output, corruption_output
-        x = self.sku(x)
+        # x = self.sku(x)
         return x
 
 def get_model(config):
