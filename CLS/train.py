@@ -10,12 +10,16 @@ import argparse  # 导入argparse
 
 def train(config):
     # 设置设备
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    if config['device'] == 'auto':
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    else:
+        device = torch.device(config['device'])
+    print(f"Using device: {device}")
     
     # 创建模型
     model = get_model(config)
     model.to(device)
-    print(model)    
+    print(model)
     # 加载训练过的模型
     if config['resume']:
         model_path = os.path.join(config['checkpoint_dir'], 'best_model.pth')
@@ -145,7 +149,11 @@ if __name__ == '__main__':
     parser.add_argument('--model_name', type=str, default='resnet18', help='使用的模型')
     parser.add_argument('--num_classes', type=int, default=102, help='类别数')
     parser.add_argument('--pretrained', type=bool, default=False, help='是否使用预训练模型')
+    parser.add_argument('--device', type=str, default='auto', 
+                       choices=['auto', 'cuda:0', 'cpu'], 
+                       help='使用的设备 (auto/cuda/cpu)')
     parser.add_argument('--resume', type=bool, default=False, help='是否从上次训练中恢复')
+    
 
     # 解析参数
     config = vars(parser.parse_args())
