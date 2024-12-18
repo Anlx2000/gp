@@ -3,18 +3,25 @@ import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 sobel_x = torch.tensor([[-1, -2, -1],
                         [0, 0, 0],
-                        [1, 2, 1]], dtype=torch.float, requires_grad=False).view(1, 1, 3, 3)
+                        [1, 2, 1]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)
 sobel_y = torch.tensor([[-1, 0, 1],
                         [-2, 0, 2],
-                        [-1, 0, 1]], dtype=torch.float, requires_grad=False).view(1, 1, 3, 3)
+                        [-1, 0, 1]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)
 laplace = torch.tensor([[0, 1, 0],
                         [1, -4, 1],
-                        [0, 1, 0]], dtype=torch.float, requires_grad=False).view(1, 1, 3, 3)
+                        [0, 1, 0]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)
 avgpool = torch.tensor([[1/9, 1/9, 1/9],
                          [1/9, 1/9, 1/9],
-                         [1/9, 1/9, 1/9]], dtype=torch.float, requires_grad=False).view(1, 1, 3, 3)
+                         [1/9, 1/9, 1/9]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)
+
+sharpen = torch.tensor([[-1, -1, -1],
+                        [-1, 8, -1],
+                        [-1, -1, -1]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)
+
 
 def conv_operator(filename, kernel, in_channels=1):
     if in_channels == 1:
@@ -58,4 +65,7 @@ if __name__=="__main__":
 
     _, y = conv_operator(img_name, avgpool, 3)
     plt_show("avgpool", y)
+
+    _, y = conv_operator(img_name, sharpen, 3)
+    plt_show("sharpen", y)
 

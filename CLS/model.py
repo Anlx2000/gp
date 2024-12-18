@@ -32,10 +32,13 @@ class FlowerClassifier(nn.Module):
         # 获取特征维度
         in_features = self.backbone.fc.in_features
         
-        self.backbone.avgpool = nn.Sequential(
-            FilterAtten(HW=7, inplane=512),
-            nn.AdaptiveAvgPool2d((1, 1))
-        )
+        # self.backbone.avgpool = nn.Sequential(
+        #     FilterAtten(HW=7, inplane=512),
+        #     nn.AdaptiveAvgPool2d((1, 1))
+        # )
+        self.backbone.layer1.append(FilterAtten(HW=56, inplane=64))
+        self.backbone.layer2.append(FilterAtten(HW=28, inplane=128))
+        self.backbone.layer3.append(FilterAtten(HW=14, inplane=256))
 
         # 替换最后的全连接层
         self.backbone.fc = nn.Sequential(

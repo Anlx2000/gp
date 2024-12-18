@@ -10,11 +10,12 @@ import argparse  # 导入argparse
 
 def train(config):
     # 设置设备
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     
     # 创建模型
     model = get_model(config)
-    print(model)
+    model.to(device)
+    print(model)    
     # 加载训练过的模型
     if config['resume']:
         model_path = os.path.join(config['checkpoint_dir'], 'best_model.pth')
