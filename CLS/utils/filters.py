@@ -23,6 +23,10 @@ sharpen = torch.tensor([[-1, -1, -1],
                         [-1, -1, -1]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)
 
 
+sharpen = torch.tensor([[-1, -1, -1],
+                        [-1, 8, -1],
+                        [-1, -1, -1]], dtype=torch.float, requires_grad=False).view(1, 1, 3, 3)
+
 def conv_operator(filename, kernel, in_channels=1):
     if in_channels == 1:
         img = np.expand_dims(cv2.imread(filename, 0), 2)    # gray
@@ -51,7 +55,7 @@ def plt_show(windowsname, img, channels=1):
     plt.show()
 
 if __name__=="__main__":
-    img_name = '/Users/anlx/研究生/毕设/CLS/corruption_imgs/snow.png'
+    img_name = '/Users/anlx/研究生/毕设/CLS/corruption_imgs/fog.png'
 
     img, y = conv_operator(img_name, sobel_x, 3)
     plt_show("input img", img, 3)
