@@ -21,6 +21,9 @@ import torch
 import torch.nn as nn
 from PIL import Image
 from torch.cuda import amp
+import sys, os
+sys.path.append("..")
+from module import filter_atten
 
 # Import 'ultralytics' package or install if missing
 try:
@@ -245,6 +248,16 @@ class C3(nn.Module):
     def forward(self, x):
         """Performs forward propagation using concatenated outputs from two convolutions and a Bottleneck sequence."""
         return self.cv3(torch.cat((self.m(self.cv1(x)), self.cv2(x)), 1))
+
+class C3Atten(C3):
+    """Extends the C3 module with cross-convolutions for enhanced feature extraction in neural networks."""
+
+    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5):
+        """Initializes C3x module with cross-convolutions, extending C3 with customizable channel dimensions, groups,
+        and expansion.
+        """
+        super().__init__(c1, c2, n, shortcut, g, e)
+        self.m = filter_atten(c2)
 
 
 class C3x(C3):

@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
-from utils.filters import sobel_x, sobel_y, laplace, sharpen
+from .filters import sobel_x, sobel_y, laplace, sharpen
 import torch.nn.functional as F
 
 class FilterAtten(nn.Module):
-    def __init__(self, HW = 16, inplane=3):
+    def __init__(self, inplane=3):
         '''
         HW: 特征图大小
         inplane: 输入通道数
