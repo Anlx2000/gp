@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 sobel_x = torch.tensor([[-1, -2, -1],
                         [0, 0, 0],
                         [1, 2, 1]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)

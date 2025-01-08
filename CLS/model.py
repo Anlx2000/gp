@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from resnet18 import resnet18
 from sku import SKNet
+from module.fcanet import fcanet18
 from utils.filter_atten import FilterAtten
 import torchvision.models as models
 
@@ -19,7 +20,7 @@ class FlowerClassifier(nn.Module):
         
         # 选择backbone
         if model_name == 'resnet18':
-            self.backbone = models.resnet18(num_classes, pretrained=pretrained)
+            self.backbone = fcanet18(num_classes, pretrained=pretrained)
         elif model_name == 'resnet34':
             self.backbone = models.resnet34(pretrained=pretrained)
         elif model_name == 'resnet50':

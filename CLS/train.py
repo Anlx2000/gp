@@ -11,7 +11,7 @@ import argparse  # 导入argparse
 def train(config):
     # 设置设备
     if config['device'] == 'auto':
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
     else:
         device = torch.device(config['device'])
     print(f"Using device: {device}")
@@ -36,7 +36,7 @@ def train(config):
     
     # 学习率调度器 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='max', factor=0.1, patience=5, verbose=True
+        optimizer, mode='max', factor=0.1, patience=20, verbose=True
     )
     
     # 获取数据加载器

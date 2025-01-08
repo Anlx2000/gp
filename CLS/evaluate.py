@@ -18,7 +18,7 @@ class ModelEvaluator:
             config: 配置字典，包含模型和评估相关的参数
         """
         self.config = config
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
         
         # 加载模型
         self.model = self._load_model()
@@ -166,7 +166,7 @@ def main():
     # 2. 评估不同噪声类型下的性能
     corruptions = ['snow', 'fog', 'brightness', 'contrast', 'elastic', 'pixelate', 'jpeg']
     corruption_results = evaluator.evaluate_corruptions(corruptions)
-    
+      
     print("\n不同噪声类型下的准确率:")
     for corruption, results in corruption_results.items():
         print(f"{corruption}: {results['accuracy']:.2f}%")
