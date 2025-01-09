@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 sobel_x = torch.tensor([[-1, -2, -1],
                         [0, 0, 0],
                         [1, 2, 1]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)
@@ -45,6 +45,11 @@ class FilterAtten(nn.Module):
         self.sobel_y.weight.data.copy_(self.sobel_y_kernel.repeat(self.inplane, 1, 1, 1))
         self.laplace.weight.data.copy_(self.laplace_kernel.repeat(self.inplane, 1, 1, 1))
         self.sharpen.weight.data.copy_(self.sharpen_kernel.repeat(self.inplane, 1, 1, 1))
+        self.sobel_x.weight.requires_grad_(False)
+        self.sobel_y.weight.requires_grad_(False)
+        self.laplace.weight.requires_grad_(False)
+        self.sharpen.weight.requires_grad_(False)
+        
     def forward(self, x):
         device = x.device
         self.sobel_x_kernel = self.sobel_x_kernel.to(device)

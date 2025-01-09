@@ -21,7 +21,7 @@ import torch
 import torch.nn as nn
 from PIL import Image
 from torch.cuda import amp
-from module import filter_atten
+# from module import filter_atten
 
 # Import 'ultralytics' package or install if missing
 try:
