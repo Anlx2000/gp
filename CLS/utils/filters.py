@@ -25,7 +25,7 @@ sharpen = torch.tensor([[-1, -1, -1],
 
 sharpen = torch.tensor([[-1, -1, -1],
                         [-1, 8, -1],
-                        [-1, -1, -1]], dtype=torch.float, requires_grad=False).view(1, 1, 3, 3)
+                        [-1, -1, -1]], dtype=torch.float, requires_grad=False, device=device).view(1, 1, 3, 3)
 
 def conv_operator(filename, kernel, in_channels=1):
     if in_channels == 1:

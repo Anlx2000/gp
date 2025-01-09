@@ -150,7 +150,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_classes', type=int, default=102, help='类别数')
     parser.add_argument('--pretrained', type=bool, default=False, help='是否使用预训练模型')
     parser.add_argument('--device', type=str, default='auto', 
-                       choices=['auto', 'cuda:0', 'cpu'], 
+                       choices=['auto', 'cuda:0', 'cpu', 'cuda:3'], 
                        help='使用的设备 (auto/cuda/cpu)')
     parser.add_argument('--resume', type=bool, default=False, help='是否从上次训练中恢复')
     

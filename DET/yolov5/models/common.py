@@ -21,8 +21,6 @@ import torch
 import torch.nn as nn
 from PIL import Image
 from torch.cuda import amp
-import sys, os
-sys.path.append("..")
 from module import filter_atten
 
 # Import 'ultralytics' package or install if missing
@@ -256,8 +254,11 @@ class C3Atten(C3):
         """Initializes C3x module with cross-convolutions, extending C3 with customizable channel dimensions, groups,
         and expansion.
         """
-        super().__init__(c1, c2, n, shortcut, g, e)
-        self.m = filter_atten(c2)
+        super().__init__(c1, c2, n, shortcut, g, e) 
+        # self.m = filter_atten.FilterAtten(int(c2*e))
+        c_ = int(c2 * e)
+        self.m = nn.Sequential(*(CrossConv(c_, c_, 3, 1, g, 1.0, shortcut) for _ in range(n)))
+
 
 
 class C3x(C3):
