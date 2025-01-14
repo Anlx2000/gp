@@ -21,7 +21,7 @@ import torch
 import torch.nn as nn
 from PIL import Image
 from torch.cuda import amp
-# from module import filter_atten
+from module import dlk
 
 # Import 'ultralytics' package or install if missing
 try:
@@ -255,9 +255,9 @@ class C3Atten(C3):
         and expansion.
         """
         super().__init__(c1, c2, n, shortcut, g, e) 
-        # self.m = filter_atten.FilterAtten(int(c2*e))
-        c_ = int(c2 * e)
-        self.m = nn.Sequential(*(CrossConv(c_, c_, 3, 1, g, 1.0, shortcut) for _ in range(n)))
+        self.m = dlk.DLK(int(c2*e))
+        # c_ = int(c2 * e)
+        # self.m = nn.Sequential(*(CrossConv(c_, c_, 3, 1, g, 1.0, shortcut) for _ in range(n)))
 
 
 
@@ -903,7 +903,7 @@ class AutoShape(nn.Module):
             x = np.ascontiguousarray(np.array(x).transpose((0, 3, 1, 2)))  # stack and BHWC to BCHW
             x = torch.from_numpy(x).to(p.device).type_as(p) / 255  # uint8 to fp16/32
 
-        with amp.autocast(autocast):
+        with torch.amp.autocast(device_type = "cuda",enabled=autocast):
             # Inference
             with dt[1]:
                 y = self.model(x, augment=augment)  # forward

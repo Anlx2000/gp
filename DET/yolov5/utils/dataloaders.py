@@ -531,6 +531,8 @@ def img2label_paths(img_paths):
     """Generates label file paths from corresponding image file paths by replacing `/images/` with `/labels/` and
     extension with `.txt`.
     """
+    # if 'coco' in str(img_paths[0]):
+    #     return ['/disk/anlx/gp/DET/datasets/coco/labels/val2017/' + x.split('/')[-1][:-4] + '.txt' for x in img_paths]
     sa, sb = f"{os.sep}images{os.sep}", f"{os.sep}labels{os.sep}"  # /images/, /labels/ substrings
     return [sb.join(x.rsplit(sa, 1)).rsplit(".", 1)[0] + ".txt" for x in img_paths]
 

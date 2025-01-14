@@ -56,8 +56,6 @@ class FilterAtten(nn.Module):
         self.sobel_y_kernel = self.sobel_y_kernel.to(device)
         self.laplace_kernel = self.laplace_kernel.to(device)
         self.sharpen_kernel = self.sharpen_kernel.to(device)
-        print(x.type, self.sobel_x_kernel.type)
-        print(x.device, self.sobel_x_kernel.device)
         sobel_x_out = self.sobel_x(x)
         sobel_y_out = self.sobel_y(x)
         laplace_out = self.laplace(x)

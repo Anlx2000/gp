@@ -3,8 +3,8 @@
 Validate a trained YOLOv5 detection model on a detection dataset.
 
 Usage:
-    $ python val.py --weights yolov5s.pt --data coco128.yaml --img 640
-
+    $ python val.py --weights /disk/anlx/gp/DET/yolov5/runs/train/exp9/weights/best.pt --data coco-c.yaml --img 640
+    $ python val.py --weights /disk/anlx/gp/DET/yolov5/runs/train/voc7/weights/last.pt --data VOC2012.yaml --img 512
 Usage - formats:
     $ python val.py --weights yolov5s.pt                 # PyTorch
                               yolov5s.torchscript        # TorchScript
@@ -194,7 +194,7 @@ def run(
     iou_thres=0.6,  # NMS IoU threshold
     max_det=300,  # maximum detections per image
     task="val",  # train, val, test, speed or study
-    device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+    device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
     workers=8,  # max dataloader workers (per RANK in DDP mode)
     single_cls=False,  # treat as single-class dataset
     augment=False,  # augmented inference
@@ -285,6 +285,7 @@ def run(
     # Configure
     model.eval()
     cuda = device.type != "cpu"
+    print(device.type)
     is_coco = isinstance(data.get("val"), str) and data["val"].endswith(f"coco{os.sep}val2017.txt")  # COCO dataset
     nc = 1 if single_cls else int(data["nc"])  # number of classes
     iouv = torch.linspace(0.5, 0.95, 10, device=device)  # iou vector for mAP@0.5:0.95
@@ -517,13 +518,13 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default=ROOT / "data/coco128.yaml", help="dataset.yaml path")
     parser.add_argument("--weights", nargs="+", type=str, default=ROOT / "yolov5s.pt", help="model path(s)")
-    parser.add_argument("--batch-size", type=int, default=32, help="batch size")
+    parser.add_argument("--batch-size", type=int, default=64, help="batch size")
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=640, help="inference size (pixels)")
     parser.add_argument("--conf-thres", type=float, default=0.001, help="confidence threshold")
     parser.add_argument("--iou-thres", type=float, default=0.6, help="NMS IoU threshold")
     parser.add_argument("--max-det", type=int, default=300, help="maximum detections per image")
     parser.add_argument("--task", default="val", help="train, val, test, speed or study")
-    parser.add_argument("--device", default="", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
+    parser.add_argument("--device", default="0", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument("--workers", type=int, default=8, help="max dataloader workers (per RANK in DDP mode)")
     parser.add_argument("--single-cls", action="store_true", help="treat as single-class dataset")
     parser.add_argument("--augment", action="store_true", help="augmented inference")
